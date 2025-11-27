@@ -23,22 +23,22 @@ class RecommendationController extends Controller
 
         $recommendations = [];
 
-        // Simple association rule: if product name contains "Coffee", recommend "Sugar" or "Bread"
-        if (stripos($product->name, 'Coffee') !== false) {
-            $sugar = Product::where('name', 'like', '%Sugar%')->first();
-            $bread = Product::where('name', 'like', '%Bread%')->first();
-
-            if ($sugar) $recommendations[] = $sugar;
-            if ($bread) $recommendations[] = $bread;
-        } elseif (stripos($product->name, 'Bread') !== false) {
-            $butter = Product::where('name', 'like', '%Butter%')->first();
-            $jam = Product::where('name', 'like', '%Jam%')->first();
-
-            if ($butter) $recommendations[] = $butter;
-            if ($jam) $recommendations[] = $jam;
+        // Rule-based recommendations
+        if ($productId == 1 || $productId == 5) {
+            // If Kopi (1) or Teh (5), recommend Gula (2) and Susu (6)
+            $gula = Product::find(2);
+            $susu = Product::find(6);
+            if ($gula) $recommendations[] = $gula;
+            if ($susu) $recommendations[] = $susu;
+        } elseif ($productId == 3) {
+            // If Roti (3), recommend Selai (4) and Susu (6)
+            $selai = Product::find(4);
+            $susu = Product::find(6);
+            if ($selai) $recommendations[] = $selai;
+            if ($susu) $recommendations[] = $susu;
         } else {
-            // Default recommendations: random products
-            $recommendations = Product::where('id', '!=', $productId)->inRandomOrder()->limit(2)->get();
+            // Default: 2 random products
+            $recommendations = Product::where('id', '!=', $productId)->inRandomOrder()->take(2)->get();
         }
 
         return response()->json($recommendations);

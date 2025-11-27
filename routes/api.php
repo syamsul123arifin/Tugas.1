@@ -2,36 +2,44 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// --- BAGIAN 1: DAFTAR IMPORT (Letakkan di Paling Atas) ---
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\RecommendationController; // <-- Ini yang barusan kita tambah
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// --- BAGIAN 2: ROUTE PUBLIK (Bisa diakses tanpa login) ---
 
-// Auth routes
+// Route Login & Register
 Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::post('/register', [AuthController::class, 'register']); // Opsional
 
-// Product routes
-Route::middleware('auth:sanctum')->get('/products', [ProductController::class, 'index']);
-Route::middleware('auth:sanctum')->post('/products', [ProductController::class, 'store']);
+// Route AI Rekomendasi (Kita taruh di luar middleware agar mudah dites di browser)
+Route::get('/recommendations', [RecommendationController::class, 'index']); 
 
-// Transaction routes
-Route::middleware('auth:sanctum')->post('/checkout', [TransactionController::class, 'checkout']);
 
-// Recommendation routes
-Route::middleware('auth:sanctum')->get('/recommendations', [RecommendationController::class, 'index']);
+// --- BAGIAN 3: ROUTE PRIVATE (Harus Login / Punya Token) ---
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Route Logout
+    Route::post('/logout', [AuthController::class, 'logout']);
+    
+    // Route Produk
+    Route::get('/products', [ProductController::class, 'index']);
+    Route::post('/products', [ProductController::class, 'store']);
+    
+    // Route Transaksi
+    Route::post('/checkout', [TransactionController::class, 'checkout']);
+    
+    // Route User Info
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+});
