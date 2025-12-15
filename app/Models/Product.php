@@ -16,6 +16,11 @@ class Product extends Model
         'barcode',
     ];
 
+    protected $casts = [
+        'price' => 'integer',
+        'stock' => 'integer',
+    ];
+
     public function transactionDetails()
     {
         return $this->hasMany(TransactionDetail::class);
